@@ -3,7 +3,7 @@ using System.Text;
 
 namespace RabbitMqTest
 {
-    public class UnitTest1
+    public class ProducerOneTests
     {
         const string QueueOne = "queue_1";
         const string QueueTwo = "queue_2";
