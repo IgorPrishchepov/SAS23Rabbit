@@ -12,7 +12,7 @@ namespace RabbitMqTest.RPC
             Channel.QueueDeclare(queue: queueName,
                      durable: false,
                      exclusive: false,
-                     autoDelete: false,
+                     autoDelete: true,
                      arguments: null);
 
             Channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);

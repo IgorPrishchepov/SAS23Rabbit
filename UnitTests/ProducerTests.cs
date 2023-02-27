@@ -1,7 +1,7 @@
 using FluentAssertions;
 using System.Text;
 
-namespace RabbitMqTest
+namespace RabbitMqTest.UnitTests
 {
     public class ProducerTests
     {
@@ -17,13 +17,13 @@ namespace RabbitMqTest
             using var consumer = new Consumer();
             consumer.DeclareQueue(QueueOne);
 
-            using var producer = new Producer();           
+            using var producer = new Producer();
             producer.DeclareQueue(QueueOne);
-           
-            var msg = Encoding.UTF8.GetBytes(TestMessageOne);
-            producer.PublishToQueueDefaultExchange(QueueOne, numberOfMessages:5, frequencyMilliseconds: 5000, message: msg); ;
 
-            await TestUtilities.WaitUntil(() => consumer.Messages?.Count == 5 );
+            var msg = Encoding.UTF8.GetBytes(TestMessageOne);
+            producer.PublishToQueueDefaultExchange(QueueOne, numberOfMessages: 5, frequencyMilliseconds: 5000, message: msg); ;
+
+            await TestUtilities.WaitUntil(() => consumer.Messages?.Count == 5);
 
             consumer?.Messages?.All(m => m.Queue.Equals(QueueOne)).Should().BeTrue(because: $"Not all messages belong to {QueueOne} queu");
             consumer?.Messages?.All(m => m.Body.Equals(TestMessageOne)).Should().BeTrue(because: $"Not all messages have correct data");
@@ -45,7 +45,7 @@ namespace RabbitMqTest
             var msg = Encoding.UTF8.GetBytes(TestMessageOne);
             producer.PublishToQueueDefaultExchange(QueueOne, numberOfMessages: 5, frequencyMilliseconds: 5000, message: msg); ;
 
-            await TestUtilities.WaitUntil(() => (consumerOne.Messages?.Count + (consumerTwo.Messages?.Count) == 5));
+            await TestUtilities.WaitUntil(() => consumerOne.Messages?.Count + (consumerTwo.Messages?.Count) == 5);
 
             (!consumerOne?.Messages?.IsEmpty).Should().BeTrue(because: "Comnsumer One must consume part of messages");
             (!consumerTwo?.Messages?.IsEmpty).Should().BeTrue(because: "Comnsumer Two must consume part of messages");
@@ -71,10 +71,10 @@ namespace RabbitMqTest
 
             var msg = Encoding.UTF8.GetBytes(TestMessageOne);
             producer.PublishToQueueDefaultExchange(QueueOne, numberOfMessages: 5, frequencyMilliseconds: 5000, message: msg);
-                        
+
             producer.PublishToQueueDefaultExchange(QueueTwo, numberOfMessages: 5, frequencyMilliseconds: 5000, message: msg);
 
-            await TestUtilities.WaitUntil(() => (consumerOne.Messages?.Count + (consumerTwo.Messages?.Count) == 10));
+            await TestUtilities.WaitUntil(() => consumerOne.Messages?.Count + (consumerTwo.Messages?.Count) == 10);
 
             consumerOne?.Messages?.All(m => m.Queue.Equals(QueueOne)).Should().BeTrue(because: $"Not all messages belong to {QueueOne} queu");
             consumerTwo?.Messages?.All(m => m.Queue.Equals(QueueTwo)).Should().BeTrue(because: $"Not all messages belong to {QueueTwo} queu");
@@ -86,7 +86,7 @@ namespace RabbitMqTest
         public async Task OneConsumerTwoQueuesTest()
         {
             using var consumerOne = new Consumer();
-            consumerOne.DeclareQueue(QueueOne);            
+            consumerOne.DeclareQueue(QueueOne);
             consumerOne.DeclareQueue(QueueTwo);
 
             using var producer = new Producer();
@@ -98,10 +98,10 @@ namespace RabbitMqTest
 
             producer.PublishToQueueDefaultExchange(QueueTwo, numberOfMessages: 5, frequencyMilliseconds: 3000, message: msg);
 
-            await TestUtilities.WaitUntil(() => (consumerOne.Messages?.Count == 10));
+            await TestUtilities.WaitUntil(() => consumerOne.Messages?.Count == 10);
 
             consumerOne?.Messages?.Where(m => m.Queue.Equals(QueueOne)).Count().Should().Be(5, because: $"Not all messages of {QueueOne} were consumed");
-            consumerOne?.Messages?.Where(m => m.Queue.Equals(QueueTwo)).Count().Should().Be(5, because: $"Not all messages of {QueueTwo} were consumed");        
+            consumerOne?.Messages?.Where(m => m.Queue.Equals(QueueTwo)).Count().Should().Be(5, because: $"Not all messages of {QueueTwo} were consumed");
         }
 
         [Fact(DisplayName = "Verify that second Consumer receives message that was not completely processed by first consumer and was not acknowledged")]
@@ -118,7 +118,7 @@ namespace RabbitMqTest
             using var consumerTwo = new Consumer();
             consumerTwo.DeclareQueue(QueueOne);
 
-            consumerOne.Dispose();            
+            consumerOne.Dispose();
 
             await TestUtilities.WaitUntil(() => consumerTwo.Messages?.Count != 0);
 
@@ -155,8 +155,8 @@ namespace RabbitMqTest
                 routingKey: routingKey,
                 numberOfMessages: 3,
                 frequencyMilliseconds: 5000,
-                message: msgTwo);                    
-            
+                message: msgTwo);
+
             await TestUtilities.WaitUntil(() => consumer.Messages?.Count == 3);
 
             consumer?.Messages?.All(m => m.Queue.Equals(QueueOne)).Should().BeTrue(because: $"Not all messages belong to {QueueOne} queu");
@@ -180,7 +180,7 @@ namespace RabbitMqTest
             producer.DeclareQueue(QueueThree);
 
             using var consumerOne = new Consumer();
-            consumerOne.DeclareTopicExchange(QueueThree, exchange, "critical.*");           
+            consumerOne.DeclareTopicExchange(QueueThree, exchange, "critical.*");
 
             var msg = Encoding.UTF8.GetBytes(keyValue[routingKeyCritical]);
             producer.PublishToQueueTopicExchange(
