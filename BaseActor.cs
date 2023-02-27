@@ -13,6 +13,16 @@ namespace RabbitMqTest
             _connection = factory.CreateConnection();
             Channel = _connection.CreateModel();
         }
+
+        public void DeclareQueue(string queueName)
+        {
+            Channel.QueueDeclare(queue: queueName,
+                         durable: false,
+                         exclusive: false,
+                         autoDelete: false,
+                         arguments: null);
+        }
+
         public virtual void Dispose()
         {
             _connection.Dispose();

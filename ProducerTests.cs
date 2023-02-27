@@ -3,7 +3,7 @@ using System.Text;
 
 namespace RabbitMqTest
 {
-    public class ProducerOneTests
+    public class ProducerTests
     {
         const string QueueOne = "queue_1";
         const string QueueTwo = "queue_2";
@@ -11,7 +11,7 @@ namespace RabbitMqTest
         const string TestMessageOne = "Hello from XUnit";
         const string TestMessageTwo = "Direct: Hello from XUnit";
 
-        [Fact(DisplayName = "Verify that 1 Consumer receives all messages produced by 1 producer")]
+        [Fact(DisplayName = "Verify that 1 Consumer receives all messages produced by 1 producer by Default exchange")]
         public async Task OneProducerOneConsumerTest()
         {
             using var consumer = new Consumer();
@@ -30,7 +30,7 @@ namespace RabbitMqTest
 
         }
 
-        [Fact(DisplayName = "Verify that 2 Consumers receive all messages produced by 1 producer of the same queue")]
+        [Fact(DisplayName = "Verify that 2 Consumers receive all messages produced by 1 producer of the same queue by Default exchange")]
         public async Task TwoConsumersSameQueueTest()
         {
             using var consumerOne = new Consumer();
@@ -56,7 +56,7 @@ namespace RabbitMqTest
             consumerTwo?.Messages?.All(m => m.Body.Equals(TestMessageOne)).Should().BeTrue(because: $"Not all messages have correct data");
         }
 
-        [Fact(DisplayName = "Verify that 2 Consumers receive all messages produced by 1 producer of the different queues")]
+        [Fact(DisplayName = "Verify that 2 Consumers receive all messages produced by 1 producer of the different queues by Direct exchange")]
         public async Task TwoConsumersDifferentQueuesTest()
         {
             using var consumerOne = new Consumer();
@@ -82,7 +82,7 @@ namespace RabbitMqTest
             consumerTwo?.Messages?.All(m => m.Body.Equals(TestMessageOne)).Should().BeTrue(because: $"Not all messages have correct data");
         }
 
-        [Fact(DisplayName = "Verify that 1 Consumer receives all messages produced by 1 producer of the different queues")]
+        [Fact(DisplayName = "Verify that 1 Consumer receives all messages produced by 1 producer of the different queues by Default exchange")]
         public async Task OneConsumerTwoQueuesTest()
         {
             using var consumerOne = new Consumer();
@@ -118,8 +118,7 @@ namespace RabbitMqTest
             using var consumerTwo = new Consumer();
             consumerTwo.DeclareQueue(QueueOne);
 
-            consumerOne.Dispose();
-            
+            consumerOne.Dispose();            
 
             await TestUtilities.WaitUntil(() => consumerTwo.Messages?.Count != 0);
 
@@ -177,11 +176,11 @@ namespace RabbitMqTest
                 { routingKeyMajor, "A major kernel error"}
             };
 
-            using var consumerOne = new Consumer();
-            consumerOne.DeclareTopicExchange(QueueThree, exchange, "critical.*");
-
             using var producer = new Producer();
             producer.DeclareQueue(QueueThree);
+
+            using var consumerOne = new Consumer();
+            consumerOne.DeclareTopicExchange(QueueThree, exchange, "critical.*");           
 
             var msg = Encoding.UTF8.GetBytes(keyValue[routingKeyCritical]);
             producer.PublishToQueueTopicExchange(
@@ -201,12 +200,9 @@ namespace RabbitMqTest
                 frequencyMilliseconds: 2000,
                 message: msg);
 
-
             await TestUtilities.WaitUntil(() => consumerOne.Messages?.Count == 3);
 
             consumerOne?.Messages?.All(m => m.Queue.Equals(QueueThree)).Should().BeTrue(because: $"Not all messages belong to {QueueOne} queue");
-
-
             consumerOne?.Messages?.All(m => m.Body.Equals(keyValue[routingKeyCritical])).Should().BeTrue(because: $"Not all messages have correct data");
         }
     }

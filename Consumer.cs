@@ -2,7 +2,6 @@
 using RabbitMQ.Client.Events;
 using System.Collections.Concurrent;
 using System.Text;
-using System.Threading.Channels;
 
 namespace RabbitMqTest
 {
