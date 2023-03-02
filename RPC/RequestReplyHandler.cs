@@ -4,7 +4,7 @@ using Xunit.Sdk;
 
 namespace RabbitMqTest.RPC
 {
-    public class RequestReplyHandler
+    public class RequestReplyHandler : IDisposable
     {
         public ConcurrentBag<string>? Messages { get; private set; }
 
@@ -18,6 +18,11 @@ namespace RabbitMqTest.RPC
             using var rpcClient = new RpcClient(quename);           
             var response = await rpcClient.CallAsync(message);
             Messages?.Add(response ?? "Error");      
+        }
+
+        public void Dispose()
+        {
+            Messages.Clear();
         }
     }
 }
