@@ -24,7 +24,7 @@ namespace RabbitMqTest
                 Channel.QueueDeclare(queue: queueName,
                         durable: false,
                         exclusive: false,
-                        autoDelete: false,
+                        autoDelete: true,
                         arguments: null);
                 var consumer = new EventingBasicConsumer(Channel);
 
